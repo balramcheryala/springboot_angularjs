@@ -29,16 +29,40 @@ angular.module('myApp.upload', [ 'ngRoute', 'ngResource','ui-notification' ])
          }])
          
 .controller('UploadController', ['$scope','$http','Notification', function($scope,$http, Notification ) {
-            $scope.uploadFile = function() {
-               var file = $scope.myFile;
+    
+	
+	 // On select of each file it will add in files array i.e store in Array.
+    $scope.getFileDetails = function (e) {
+
+        $scope.files = [];
+        $scope.$apply(function () {
+
+            // STORE THE FILE OBJECT IN AN ARRAY.
+            for (var i = 0; i < e.files.length; i++) {
+                $scope.files.push(e.files[i])
+            }
+
+        });
+    };
+	
+	
+	
+	$scope.uploadFile = function() {
+//               var file = $scope.myFile; // Single purpose
                
-               console.dir(file);
+//               console.dir(file);
                
                var uploadUrl = "/upload";
                var fd = new FormData();
-               fd.append('files', file);
+               
+               for (var i in $scope.files) {
+            	   fd.append("files", $scope.files[i]);
+               }
+               
+               
+//               fd.append('files', file); // single
             
-               $http.post(uploadUrl, fd, {
+              $http.post(uploadUrl, fd, {
                   transformRequest: angular.identity,
                   headers: {'Content-Type': undefined}
                })
@@ -57,5 +81,30 @@ angular.module('myApp.upload', [ 'ngRoute', 'ngResource','ui-notification' ])
        				positionX : 'right'
        			});
                })
+               
+	}; // remove this if you need to use progress bar
+	
+               /*
+               // ADD LISTENERS.
+               var objXhr = new XMLHttpRequest();
+               objXhr.addEventListener("progress", updateProgress, false);
+               objXhr.addEventListener("load", transferComplete, false);
+
+               // SEND FILE DETAILS TO THE API.
+               objXhr.open("POST", "/upload");
+               objXhr.send(fd);
             };
+            
+            // UPDATE PROGRESS BAR.
+            function updateProgress(e) {
+                if (e.lengthComputable) {
+                    document.getElementById('pro').setAttribute('value', e.loaded);
+                    document.getElementById('pro').setAttribute('max', e.total);
+                }
+            }
+
+            // CONFIRMATION.
+            function transferComplete(e) {
+                alert("Files uploaded successfully.");
+            }*/
 }]);
